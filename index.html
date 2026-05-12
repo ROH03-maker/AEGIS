@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AEGIS | FEMALE AI EDITION</title>
+    <title>Aegis AI | Bengali Edition</title>
     <style>
         :root {
             --glow: #00f2ff;
@@ -22,7 +22,7 @@
             font-family: 'Orbitron', sans-serif;
         }
 
-        /* Cybernetic Background */
+        /* Cyber Background Animation */
         body::before {
             content: "";
             position: absolute;
@@ -37,7 +37,7 @@
 
         @keyframes drift { from { transform: translate(0,0); } to { transform: translate(-40px, -40px); } }
 
-        /* A.E.G.I.S Core Interface */
+        /* Aegis Core UI */
         .aegis-core {
             position: relative;
             width: 350px;
@@ -70,26 +70,13 @@
             align-items: center;
             justify-content: center;
             color: #000;
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 900;
             animation: breath 2s ease-in-out infinite;
         }
 
         @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         @keyframes breath { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.1); opacity: 1; } }
-
-        /* Digital HUD Tags */
-        .hud-tag {
-            position: absolute;
-            color: var(--glow);
-            font-size: 10px;
-            letter-spacing: 1px;
-            border: 1px solid var(--glow);
-            padding: 4px 8px;
-            background: rgba(0, 242, 255, 0.05);
-        }
-        .tag-left { top: 20px; left: -30px; }
-        .tag-right { bottom: 20px; right: -30px; }
 
         /* Status Console */
         .console {
@@ -103,7 +90,7 @@
         }
 
         #status-txt { font-size: 16px; letter-spacing: 2px; color: var(--glow); text-transform: uppercase; }
-        #log-txt { font-size: 13px; color: #fff; margin-top: 10px; font-family: monospace; opacity: 0.7; }
+        #log-txt { font-size: 13px; color: #fff; margin-top: 10px; font-family: 'Courier New', monospace; opacity: 0.7; }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&display=swap" rel="stylesheet">
 </head>
@@ -113,16 +100,12 @@
         <div class="ring r1"></div>
         <div class="ring r2"></div>
         <div class="ring r3"></div>
-        
-        <div class="hud-tag tag-left">FEMALE_VOICE: ACTIVE</div>
-        <div class="hud-tag tag-right">PROTOCOL: GUARDIAN</div>
-
         <div class="center-glow">AEGIS</div>
     </div>
 
     <div class="console">
         <div id="status-txt">SYSTEM STANDBY</div>
-        <div id="log-txt">> Waiting for user authorization...</div>
+        <div id="log-txt">> Tap to authorize Aegis (Supports EN/HI/BN)...</div>
     </div>
 
     <script>
@@ -131,92 +114,72 @@
         
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         const recognition = new SpeechRecognition();
-        recognition.lang = 'en-US';
+        
+        // Recognition language set kora (Bangla prefer kora hochhe)
+        recognition.lang = 'bn-BD'; 
         
         const synth = window.speechSynthesis;
-        let voices = [];
 
-        // Function to find the best female voice
-        function getFemaleVoice() {
-            voices = synth.getVoices();
-            // Look for common female voice names
-            const target = voices.find(v => 
-                v.name.includes('Google US English') || 
-                v.name.includes('Zira') || 
-                v.name.includes('Samantha') || 
-                v.name.includes('Female')
-            );
-            return target || voices[0];
+        function getVoice(langCode) {
+            const voices = synth.getVoices();
+            // Specific language voice khunje ber kora
+            return voices.find(v => v.lang.includes(langCode)) || 
+                   voices.find(v => v.name.includes('Google US English')) || 
+                   voices[0];
         }
 
-        function speak(text) {
+        function speak(text, lang = 'bn-BD') {
             const utter = new SpeechSynthesisUtterance(text);
-            const femaleVoice = getFemaleVoice();
-            
-            if (femaleVoice) utter.voice = femaleVoice;
-            
-            utter.pitch = 1.25; // Higher pitch for female tone
+            utter.voice = getVoice(lang);
+            utter.pitch = 1.2;
             utter.rate = 1.0;
+            utter.lang = lang;
             synth.speak(utter);
         }
 
-        // Essential for Chrome to load voices
-        window.speechSynthesis.onvoiceschanged = () => {
-            voices = synth.getVoices();
-        };
+        window.speechSynthesis.onvoiceschanged = () => { synth.getVoices(); };
 
         function activateAegis() {
             try {
                 recognition.start();
                 statusDisplay.innerText = "SYSTEM: LISTENING...";
-                speak("A.E.G.I.S is ready. How can I help you, Rohit?");
-            } catch (e) {
-                console.log("Recognition already running.");
-            }
+                // Initial greeting mix (Bangla + English)
+                speak("নমস্কার রোহিত, Aegis সিস্টেম এখন সক্রিয়। আমি আপনাকে কিভাবে সাহায্য করতে পারি?");
+            } catch (e) { console.log("Mic error"); }
         }
 
         recognition.onresult = (event) => {
             const cmd = event.results[0][0].transcript.toLowerCase();
-            logDisplay.innerText = "> USER_INPUT: " + cmd;
+            logDisplay.innerText = "> INPUT: " + cmd;
             statusDisplay.innerText = "SYSTEM: PROCESSING...";
 
-            const isAegis = cmd.includes("aegis") || cmd.includes("agis") || cmd.includes("egis") || cmd.includes("hey");
-
-            if (cmd.includes("play")) {
-                const song = cmd.replace("play", "").trim();
-                speak("Searching media archives for " + song);
-                window.open(`https://www.youtube.com/results?search_query=${song}`, "_blank");
+            // BANGLA LOGIC
+            if (cmd.includes("গান") || cmd.includes("play")) {
+                const query = cmd.replace("গান", "").replace("চালিয়ে দাও", "").replace("play", "").trim();
+                speak("অবশ্যই রোহিত, ইউটিউবে " + query + " গানটি খুঁজে দিচ্ছি।", 'bn-BD');
+                window.open(`https://www.youtube.com/results?search_query=${query}`, "_blank");
             } 
-            else if (cmd.includes("search for")) {
-                const q = cmd.replace("search for", "").trim();
-                speak("Scanning global intelligence for " + q);
+            else if (cmd.includes("নমস্কার") || cmd.includes("হ্যালো") || cmd.includes("hello")) {
+                speak("নমস্কার! আমি Aegis, আপনার পার্সোনাল অ্যাসিস্ট্যান্ট।", 'bn-BD');
+            }
+            else if (cmd.includes("তুমি কে") || cmd.includes("who are you")) {
+                speak("আমি Aegis, রোহিত সরকারের তৈরি একটি বুদ্ধিমান সিস্টেম।", 'bn-BD');
+            }
+            else if (cmd.includes("কেমন আছো") || cmd.includes("how are you")) {
+                speak("আমি ভালো আছি। আপনার দিনটি কেমন কাটছে?", 'bn-BD');
+            }
+            else if (cmd.includes("সার্চ") || cmd.includes("search")) {
+                const q = cmd.replace("সার্চ", "").replace("করো", "").replace("search", "").trim();
+                speak("আমি ইন্টারনেটে " + q + " সম্পর্কে তথ্য খুঁজছি।", 'bn-BD');
                 window.open(`https://www.google.com/search?q=${q}`, "_blank");
             }
-            else if (cmd.includes("hello") || isAegis) {
-                speak("Hello Rohit! I am A.E.G.I.S. I am online and ready for your instructions.");
-            }
-            else if (cmd.includes("who are you")) {
-                speak("I am the Advanced Electronic Guardian and Intelligent System, or A.E.G.I.S. I was developed by Rohit Sarkar.");
-            }
-            else if (cmd.includes("open my site")) {
-                speak("Establishing connection to your art gallery.");
-                window.open("https://roh03-maker.github.io/Rohit-s-art/", "_blank");
-            }
             else {
-                speak("I've logged your command, but I don't have a protocol for it yet.");
+                // Default English response if no specific Bengali match found
+                speak("I heard " + cmd + ". I am learning this command.", 'en-US');
             }
         };
 
-        recognition.onerror = (event) => {
-            statusDisplay.innerText = "SYSTEM: ERROR";
-            if(event.error === 'not-allowed') {
-                speak("Please enable microphone access.");
-            }
-        };
-
-        recognition.onend = () => {
-            statusDisplay.innerText = "SYSTEM READY";
-        };
+        recognition.onend = () => { statusDisplay.innerText = "SYSTEM READY"; };
     </script>
 </body>
 </html>
