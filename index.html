@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AEGIS | FEMALE AI EDITION</title>
+    <style>
+        :root {
+            --glow: #00f2ff;
+            --dark-glow: rgba(0, 242, 255, 0.2);
+        }
+
+        body {
+            background-color: #000;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* Cybernetic Background */
+        body::before {
+            content: "";
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background-image: radial-gradient(circle, var(--dark-glow) 1px, transparent 1px);
+            background-size: 40px 40px;
+            opacity: 0.15;
+            z-index: -1;
+            animation: drift 30s linear infinite;
+        }
+
+        @keyframes drift { from { transform: translate(0,0); } to { transform: translate(-40px, -40px); } }
+
+        /* A.E.G.I.S Core Interface */
+        .aegis-core {
+            position: relative;
+            width: 350px;
+            height: 350px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .ring {
+            position: absolute;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            box-shadow: 0 0 20px var(--dark-glow);
+        }
+
+        .r1 { width: 340px; height: 340px; border-top: 4px solid var(--glow); border-bottom: 4px solid var(--glow); animation: rotate 8s linear infinite; }
+        .r2 { width: 280px; height: 280px; border-left: 3px dashed var(--glow); border-right: 3px dashed var(--glow); animation: rotate 5s linear reverse infinite; opacity: 0.6; }
+        .r3 { width: 160px; height: 160px; border: 1px solid var(--glow); animation: rotate 12s linear infinite; opacity: 0.4; }
+
+        .center-glow {
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, #fff, var(--glow), transparent);
+            border-radius: 50%;
+            box-shadow: 0 0 50px var(--glow), inset 0 0 20px #fff;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #000;
+            font-size: 13px;
+            font-weight: 900;
+            animation: breath 2s ease-in-out infinite;
+        }
+
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes breath { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.1); opacity: 1; } }
+
+        /* Digital HUD Tags */
+        .hud-tag {
+            position: absolute;
+            color: var(--glow);
+            font-size: 10px;
+            letter-spacing: 1px;
+            border: 1px solid var(--glow);
+            padding: 4px 8px;
+            background: rgba(0, 242, 255, 0.05);
+        }
+        .tag-left { top: 20px; left: -30px; }
+        .tag-right { bottom: 20px; right: -30px; }
+
+        /* Status Console */
+        .console {
+            margin-top: 50px;
+            width: 85%;
+            max-width: 500px;
+            border-left: 3px solid var(--glow);
+            padding: 15px;
+            background: rgba(0, 242, 255, 0.03);
+            backdrop-filter: blur(5px);
+        }
+
+        #status-txt { font-size: 16px; letter-spacing: 2px; color: var(--glow); text-transform: uppercase; }
+        #log-txt { font-size: 13px; color: #fff; margin-top: 10px; font-family: monospace; opacity: 0.7; }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="aegis-core" onclick="activateAegis()">
+        <div class="ring r1"></div>
+        <div class="ring r2"></div>
+        <div class="ring r3"></div>
+        
+        <div class="hud-tag tag-left">FEMALE_VOICE: ACTIVE</div>
+        <div class="hud-tag tag-right">PROTOCOL: GUARDIAN</div>
+
+        <div class="center-glow">AEGIS</div>
+    </div>
+
+    <div class="console">
+        <div id="status-txt">SYSTEM STANDBY</div>
+        <div id="log-txt">> Waiting for user authorization...</div>
+    </div>
+
+    <script>
+        const statusDisplay = document.getElementById('status-txt');
+        const logDisplay = document.getElementById('log-txt');
+        
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'en-US';
+        
+        const synth = window.speechSynthesis;
+        let voices = [];
+
+        // Function to find the best female voice
+        function getFemaleVoice() {
+            voices = synth.getVoices();
+            // Look for common female voice names
+            const target = voices.find(v => 
+                v.name.includes('Google US English') || 
+                v.name.includes('Zira') || 
+                v.name.includes('Samantha') || 
+                v.name.includes('Female')
+            );
+            return target || voices[0];
+        }
+
+        function speak(text) {
+            const utter = new SpeechSynthesisUtterance(text);
+            const femaleVoice = getFemaleVoice();
+            
+            if (femaleVoice) utter.voice = femaleVoice;
+            
+            utter.pitch = 1.25; // Higher pitch for female tone
+            utter.rate = 1.0;
+            synth.speak(utter);
+        }
+
+        // Essential for Chrome to load voices
+        window.speechSynthesis.onvoiceschanged = () => {
+            voices = synth.getVoices();
+        };
+
+        function activateAegis() {
+            try {
+                recognition.start();
+                statusDisplay.innerText = "SYSTEM: LISTENING...";
+                speak("A.E.G.I.S is ready. How can I help you, Rohit?");
+            } catch (e) {
+                console.log("Recognition already running.");
+            }
+        }
+
+        recognition.onresult = (event) => {
+            const cmd = event.results[0][0].transcript.toLowerCase();
+            logDisplay.innerText = "> USER_INPUT: " + cmd;
+            statusDisplay.innerText = "SYSTEM: PROCESSING...";
+
+            const isAegis = cmd.includes("aegis") || cmd.includes("agis") || cmd.includes("egis") || cmd.includes("hey");
+
+            if (cmd.includes("play")) {
+                const song = cmd.replace("play", "").trim();
+                speak("Searching media archives for " + song);
+                window.open(`https://www.youtube.com/results?search_query=${song}`, "_blank");
+            } 
+            else if (cmd.includes("search for")) {
+                const q = cmd.replace("search for", "").trim();
+                speak("Scanning global intelligence for " + q);
+                window.open(`https://www.google.com/search?q=${q}`, "_blank");
+            }
+            else if (cmd.includes("hello") || isAegis) {
+                speak("Hello Rohit! I am A.E.G.I.S. I am online and ready for your instructions.");
+            }
+            else if (cmd.includes("who are you")) {
+                speak("I am the Advanced Electronic Guardian and Intelligent System, or A.E.G.I.S. I was developed by Rohit Sarkar.");
+            }
+            else if (cmd.includes("open my site")) {
+                speak("Establishing connection to your art gallery.");
+                window.open("https://roh03-maker.github.io/Rohit-s-art/", "_blank");
+            }
+            else {
+                speak("I've logged your command, but I don't have a protocol for it yet.");
+            }
+        };
+
+        recognition.onerror = (event) => {
+            statusDisplay.innerText = "SYSTEM: ERROR";
+            if(event.error === 'not-allowed') {
+                speak("Please enable microphone access.");
+            }
+        };
+
+        recognition.onend = () => {
+            statusDisplay.innerText = "SYSTEM READY";
+        };
+    </script>
+</body>
+</html>
