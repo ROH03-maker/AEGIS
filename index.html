@@ -155,7 +155,7 @@
 
             // BANGLA LOGIC
             if (cmd.includes("song") || cmd.includes("play")) {
-                const query = cmd.replace("play english song", "").replace("play hindi song", "").replace("play bangla sogn", "").trim();
+                const query = cmd.replace("প্লে ইংলিশ সং", "").replace("প্লে হিন্দি সং", "").replace("প্লে বাংলা সং", "").trim();
                 speak("Yes Rohit, ইউটিউবে " + query + " I am lookig for the song.", 'bn-BD');
                 window.open(`https://www.youtube.com/results?search_query=${query}`, "_blank");
             } 
