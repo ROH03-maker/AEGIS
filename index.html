@@ -1,96 +1,25 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aegis AI | Bengali Edition</title>
+    <title>Aegis AI | Smart Assistant</title>
     <style>
-        :root {
-            --glow: #00f2ff;
-            --dark-glow: rgba(0, 242, 255, 0.2);
-        }
-
-        body {
-            background-color: #000;
-            margin: 0;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            font-family: 'Orbitron', sans-serif;
-        }
-
-        /* Cyber Background Animation */
-        body::before {
-            content: "";
-            position: absolute;
-            width: 200%;
-            height: 200%;
-            background-image: radial-gradient(circle, var(--dark-glow) 1px, transparent 1px);
-            background-size: 40px 40px;
-            opacity: 0.15;
-            z-index: -1;
-            animation: drift 30s linear infinite;
-        }
-
-        @keyframes drift { from { transform: translate(0,0); } to { transform: translate(-40px, -40px); } }
-
-        /* Aegis Core UI */
-        .aegis-core {
-            position: relative;
-            width: 350px;
-            height: 350px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-        }
-
-        .ring {
-            position: absolute;
-            border-radius: 50%;
-            border: 2px solid transparent;
-            box-shadow: 0 0 20px var(--dark-glow);
-        }
-
-        .r1 { width: 340px; height: 340px; border-top: 4px solid var(--glow); border-bottom: 4px solid var(--glow); animation: rotate 8s linear infinite; }
-        .r2 { width: 280px; height: 280px; border-left: 3px dashed var(--glow); border-right: 3px dashed var(--glow); animation: rotate 5s linear reverse infinite; opacity: 0.6; }
-        .r3 { width: 160px; height: 160px; border: 1px solid var(--glow); animation: rotate 12s linear infinite; opacity: 0.4; }
-
-        .center-glow {
-            width: 100px;
-            height: 100px;
-            background: radial-gradient(circle, #fff, var(--glow), transparent);
-            border-radius: 50%;
-            box-shadow: 0 0 50px var(--glow), inset 0 0 20px #fff;
-            z-index: 10;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #000;
-            font-size: 14px;
-            font-weight: 900;
-            animation: breath 2s ease-in-out infinite;
-        }
+        :root { --glow: #00f2ff; --dark: #000; }
+        body { background: var(--dark); margin: 0; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Orbitron', sans-serif; overflow: hidden; }
+        
+        .aegis-core { position: relative; width: 300px; height: 300px; display: flex; justify-content: center; align-items: center; cursor: pointer; }
+        .ring { position: absolute; border-radius: 50%; border: 2px solid transparent; }
+        .r1 { width: 100%; height: 100%; border-top: 4px solid var(--glow); border-bottom: 4px solid var(--glow); animation: rotate 8s linear infinite; }
+        .r2 { width: 80%; height: 80%; border-left: 3px dashed var(--glow); border-right: 3px dashed var(--glow); animation: rotate 5s linear reverse infinite; opacity: 0.6; }
+        .center-glow { width: 90px; height: 90px; background: radial-gradient(circle, #fff, var(--glow), transparent); border-radius: 50%; box-shadow: 0 0 50px var(--glow); z-index: 10; display: flex; align-items: center; justify-content: center; color: #000; font-size: 14px; font-weight: 900; animation: breath 2s ease-in-out infinite; }
 
         @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         @keyframes breath { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.1); opacity: 1; } }
 
-        /* Status Console */
-        .console {
-            margin-top: 50px;
-            width: 85%;
-            max-width: 500px;
-            border-left: 3px solid var(--glow);
-            padding: 15px;
-            background: rgba(0, 242, 255, 0.03);
-            backdrop-filter: blur(5px);
-        }
-
-        #status-txt { font-size: 16px; letter-spacing: 2px; color: var(--glow); text-transform: uppercase; }
-        #log-txt { font-size: 13px; color: #fff; margin-top: 10px; font-family: 'Courier New', monospace; opacity: 0.7; }
+        .console { margin-top: 40px; width: 85%; max-width: 450px; border-left: 3px solid var(--glow); padding: 15px; background: rgba(0, 242, 255, 0.05); }
+        #status-txt { font-size: 15px; color: var(--glow); letter-spacing: 2px; }
+        #log-txt { font-size: 12px; color: #fff; margin-top: 10px; font-family: monospace; opacity: 0.7; }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&display=swap" rel="stylesheet">
 </head>
@@ -99,39 +28,30 @@
     <div class="aegis-core" onclick="activateAegis()">
         <div class="ring r1"></div>
         <div class="ring r2"></div>
-        <div class="ring r3"></div>
         <div class="center-glow">AEGIS</div>
     </div>
 
     <div class="console">
         <div id="status-txt">SYSTEM STANDBY</div>
-        <div id="log-txt">> Tap to authorize Aegis (Supports EN/HI/BN)...</div>
+        <div id="log-txt">> Click core to initialize...</div>
     </div>
 
     <script>
         const statusDisplay = document.getElementById('status-txt');
         const logDisplay = document.getElementById('log-txt');
-        
+        const synth = window.speechSynthesis;
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         const recognition = new SpeechRecognition();
-        
-        // Recognition language set kora (Bangla prefer kora hochhe)
-        recognition.lang = 'bn-BD'; 
-        
-        const synth = window.speechSynthesis;
 
-        function getVoice(langCode) {
-            const voices = synth.getVoices();
-            // Specific language voice khunje ber kora
-            return voices.find(v => v.lang.includes(langCode)) || 
-                   voices.find(v => v.name.includes('Google US English')) || 
-                   voices[0];
-        }
+        // Language set to English for better "Play" command detection
+        recognition.lang = 'en-US'; 
+        recognition.continuous = false;
 
-        function speak(text, lang = 'bn-BD') {
+        function speak(text, lang = 'en-US') {
             const utter = new SpeechSynthesisUtterance(text);
-            utter.voice = getVoice(lang);
-            utter.pitch = 1.2;
+            const voices = synth.getVoices();
+            utter.voice = voices.find(v => v.lang.includes(lang) || v.name.includes('Female')) || voices[0];
+            utter.pitch = 1.1;
             utter.rate = 1.0;
             utter.lang = lang;
             synth.speak(utter);
@@ -142,44 +62,53 @@
         function activateAegis() {
             try {
                 recognition.start();
-                statusDisplay.innerText = "SYSTEM: LISTENING...";
-                // Initial greeting mix (Bangla + English)
-                speak("Hi Rohit, I'm Aegis. How can I help you?");
-            } catch (e) { console.log("Mic error"); }
+                statusDisplay.innerText = "LISTENING...";
+                logDisplay.innerText = "> System active. Waiting for command...";
+                speak("Aegis is online. What should I play, Rohit?");
+            } catch (e) { console.log("Mic already active"); }
         }
 
         recognition.onresult = (event) => {
             const cmd = event.results[0][0].transcript.toLowerCase();
-            logDisplay.innerText = "> INPUT: " + cmd;
-            statusDisplay.innerText = "SYSTEM: PROCESSING...";
+            logDisplay.innerText = "> USER: " + cmd;
+            statusDisplay.innerText = "PROCESSING...";
 
-            // BANGLA LOGIC
-            if (cmd.includes("song") || cmd.includes("play")) {
-                const query = cmd.replace("প্লে ইংলিশ সং", "").replace("প্লে হিন্দি সং", "").replace("প্লে বাংলা সং", "").trim();
-                speak("Yes Rohit, ইউটিউবে " + query + " I am lookig for the song.", 'bn-BD');
-                window.open(`https://www.youtube.com/results?search_query=${query}`, "_blank");
+            // YouTube Play Logic
+            if (cmd.includes("play") || cmd.includes("song")) {
+                // Extracts everything after 'play'
+                let songQuery = cmd.split("play").pop().trim();
+                if(!songQuery) songQuery = cmd.split("song").pop().trim();
+
+                speak("Sure Rohit, searching YouTube for " + songQuery);
+                window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(songQuery)}`, "_blank");
             } 
-            else if (cmd.includes("নমস্কার") || cmd.includes("হ্যালো") || cmd.includes("hello")) {
-                speak("নমস্কার! আমি Aegis, আপনার পার্সোনাল অ্যাসিস্ট্যান্ট।", 'bn-BD');
+            
+            // Google Search Logic
+            else if (cmd.includes("search") || cmd.includes("find")) {
+                let searchQuery = cmd.split("search").pop().trim();
+                speak("Scanning the web for " + searchQuery);
+                window.open(`https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`, "_blank");
             }
-            else if (cmd.includes("তুমি কে") || cmd.includes("who are you")) {
-                speak("আমি Aegis, রোহিত তৈরি একটি বুদ্ধিমান সিস্টেম।", 'bn-BD');
+
+            // Simple Greetings
+            else if (cmd.includes("hello") || cmd.includes("hi aegis")) {
+                speak("Hello Rohit! All systems are functional.");
             }
-            else if (cmd.includes("কেমন আছো") || cmd.includes("how are you")) {
-                speak("I'm good. How about you?", 'bn-BD');
-            }
-            else if (cmd.includes("সার্চ") || cmd.includes("search")) {
-                const q = cmd.replace("সার্চ", "").replace("করো", "").replace("search", "").trim();
-                speak("আমি ইন্টারনেটে " + q + " সম্পর্কে তথ্য খুঁজছি।", 'bn-BD');
-                window.open(`https://www.google.com/search?q=${q}`, "_blank");
+            else if (cmd.includes("who are you")) {
+                speak("I am Aegis, your personal intelligence system.");
             }
             else {
-                // Default English response if no specific Bengali match found
-                speak("I heard " + cmd + ". I am learning this command.", 'en-US');
+                speak("Command received: " + cmd);
             }
         };
 
-        recognition.onend = () => { statusDisplay.innerText = "SYSTEM READY"; };
+        recognition.onend = () => {
+            statusDisplay.innerText = "SYSTEM READY";
+        };
+
+        recognition.onerror = (err) => {
+            logDisplay.innerText = "> Error: " + err.error;
+        };
     </script>
 </body>
 </html>
