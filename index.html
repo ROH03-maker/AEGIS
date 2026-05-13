@@ -156,7 +156,7 @@
             // BANGLA LOGIC
             if (cmd.includes("song") || cmd.includes("play")) {
                 const query = cmd.replace("play english song", "").replace("play hindi song", "").replace("play bangla sogn", "").trim();
-                speak("Yes Rohit, Youtube " + query + " I am lookig for the song.", 'bn-BD');
+                speak("Yes Rohit, ইউটিউবে " + query + " I am lookig for the song.", 'bn-BD');
                 window.open(`https://www.youtube.com/results?search_query=${query}`, "_blank");
             } 
             else if (cmd.includes("নমস্কার") || cmd.includes("হ্যালো") || cmd.includes("hello")) {
