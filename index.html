@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aegis AI | Smart Assistant</title>
+    <title>Aegis AI | Wake Word Edition</title>
     <style>
         :root { --glow: #00f2ff; --dark: #000; }
         body { background: var(--dark); margin: 0; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Orbitron', sans-serif; overflow: hidden; }
@@ -33,7 +33,7 @@
 
     <div class="console">
         <div id="status-txt">SYSTEM STANDBY</div>
-        <div id="log-txt">> Click core to initialize...</div>
+        <div id="log-txt">> Tap to start monitoring for 'Hey Aegis'...</div>
     </div>
 
     <script>
@@ -43,9 +43,11 @@
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         const recognition = new SpeechRecognition();
 
-        // Language set to English for better "Play" command detection
         recognition.lang = 'en-US'; 
-        recognition.continuous = false;
+        recognition.continuous = true; // Non-stop listening
+        recognition.interimResults = false;
+
+        let isListeningForCommand = false;
 
         function speak(text, lang = 'en-US') {
             const utter = new SpeechSynthesisUtterance(text);
@@ -62,52 +64,65 @@
         function activateAegis() {
             try {
                 recognition.start();
-                statusDisplay.innerText = "LISTENING...";
-                logDisplay.innerText = "> System active. Waiting for command...";
-                speak("Aegis is online. What should I play, Rohit?");
-            } catch (e) { console.log("Mic already active"); }
+                statusDisplay.innerText = "MONITORING...";
+                logDisplay.innerText = "> Say 'Hey Aegis' or 'Hello Aegis' to wake me up.";
+                speak("Aegis systems initialized. I am monitoring, Rohit.");
+            } catch (e) { 
+                console.log("Recognition already running.");
+            }
         }
 
         recognition.onresult = (event) => {
-            const cmd = event.results[0][0].transcript.toLowerCase();
-            logDisplay.innerText = "> USER: " + cmd;
-            statusDisplay.innerText = "PROCESSING...";
+            const lastMatch = event.results.length - 1;
+            const cmd = event.results[lastMatch][0].transcript.toLowerCase().trim();
+            logDisplay.innerText = "> Heard: " + cmd;
 
-            // YouTube Play Logic
-            if (cmd.includes("play") || cmd.includes("song")) {
-                // Extracts everything after 'play'
-                let songQuery = cmd.split("play").pop().trim();
-                if(!songQuery) songQuery = cmd.split("song").pop().trim();
-
-                speak("Sure Rohit, searching YouTube for " + songQuery);
-                window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(songQuery)}`, "_blank");
-            } 
-            
-            // Google Search Logic
-            else if (cmd.includes("search") || cmd.includes("find")) {
-                let searchQuery = cmd.split("search").pop().trim();
-                speak("Scanning the web for " + searchQuery);
-                window.open(`https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`, "_blank");
+            // WAKE WORD DETECTION
+            if (cmd.includes("hey aegis") || cmd.includes("hello aegis")) {
+                isListeningForCommand = true;
+                statusDisplay.innerText = "ACTIVE";
+                speak("Yes Rohit, I am listening.");
+                return; 
             }
 
-            // Simple Greetings
-            else if (cmd.includes("hello") || cmd.includes("hi aegis")) {
-                speak("Hello Rohit! All systems are functional.");
-            }
-            else if (cmd.includes("who are you")) {
-                speak("I am Aegis, your personal intelligence system.");
-            }
-            else {
-                speak("Command received: " + cmd);
+            // COMMAND LOGIC (Only triggers after wake word)
+            if (isListeningForCommand) {
+                statusDisplay.innerText = "PROCESSING...";
+
+                if (cmd.includes("play") || cmd.includes("song")) {
+                    let songQuery = cmd.split("play").pop().trim();
+                    if(!songQuery) songQuery = cmd.split("song").pop().trim();
+                    
+                    speak("Sure Rohit, searching YouTube for " + songQuery);
+                    window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(songQuery)}`, "_blank");
+                    isListeningForCommand = false; // Reset to standby
+                } 
+                else if (cmd.includes("search") || cmd.includes("find")) {
+                    let searchQuery = cmd.split("search").pop().trim();
+                    speak("Scanning the web for " + searchQuery);
+                    window.open(`https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`, "_blank");
+                    isListeningForCommand = false;
+                }
+                else if (cmd.includes("stop") || cmd.includes("sleep")) {
+                    speak("Standing by.");
+                    isListeningForCommand = false;
+                }
+                else {
+                    // Reset if command not recognized to prevent accidental triggers
+                    isListeningForCommand = false;
+                }
             }
         };
 
+        // Auto-restart if browser stops recognition
         recognition.onend = () => {
-            statusDisplay.innerText = "SYSTEM READY";
+            recognition.start();
+            statusDisplay.innerText = "MONITORING...";
         };
 
         recognition.onerror = (err) => {
             logDisplay.innerText = "> Error: " + err.error;
+            if(err.error === 'network') recognition.start();
         };
     </script>
 </body>
