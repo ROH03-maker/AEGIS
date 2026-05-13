@@ -155,18 +155,18 @@
 
             // BANGLA LOGIC
             if (cmd.includes("গান") || cmd.includes("play")) {
-                const query = cmd.replace("গান", "").replace("গান চালিয়ে দাও", "").replace("play", "").trim();
-                speak("Yes Rohit, ইউটিউবে " + query + " I am lookig for the song।", 'bn-BD');
+                const query = cmd.replace("song", "").replace("গান চালিয়ে দাও", "").replace("play", "").trim();
+                speak("Yes Rohit, ইউটিউবে " + query + " I am lookig for the song.", 'bn-BD');
                 window.open(`https://www.youtube.com/results?search_query=${query}`, "_blank");
             } 
             else if (cmd.includes("নমস্কার") || cmd.includes("হ্যালো") || cmd.includes("hello")) {
                 speak("নমস্কার! আমি Aegis, আপনার পার্সোনাল অ্যাসিস্ট্যান্ট।", 'bn-BD');
             }
             else if (cmd.includes("তুমি কে") || cmd.includes("who are you")) {
-                speak("আমি Aegis, রোহিত সরকারের তৈরি একটি বুদ্ধিমান সিস্টেম।", 'bn-BD');
+                speak("আমি Aegis, রোহিত তৈরি একটি বুদ্ধিমান সিস্টেম।", 'bn-BD');
             }
             else if (cmd.includes("কেমন আছো") || cmd.includes("how are you")) {
-                speak("আমি ভালো আছি। আপনার দিনটি কেমন কাটছে?", 'bn-BD');
+                speak("I'm good. How about you?", 'bn-BD');
             }
             else if (cmd.includes("সার্চ") || cmd.includes("search")) {
                 const q = cmd.replace("সার্চ", "").replace("করো", "").replace("search", "").trim();
