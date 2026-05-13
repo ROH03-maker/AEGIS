@@ -144,7 +144,7 @@
                 recognition.start();
                 statusDisplay.innerText = "SYSTEM: LISTENING...";
                 // Initial greeting mix (Bangla + English)
-                speak("নমস্কার রোহিত, Aegis সিস্টেম এখন সক্রিয়। আমি আপনাকে কিভাবে সাহায্য করতে পারি?");
+                speak("Hi Rohit, I'm Aegis. How can I help you?");
             } catch (e) { console.log("Mic error"); }
         }
 
@@ -155,8 +155,8 @@
 
             // BANGLA LOGIC
             if (cmd.includes("গান") || cmd.includes("play")) {
-                const query = cmd.replace("গান", "").replace("চালিয়ে দাও", "").replace("play", "").trim();
-                speak("অবশ্যই রোহিত, ইউটিউবে " + query + " গানটি খুঁজে দিচ্ছি।", 'bn-BD');
+                const query = cmd.replace("গান", "").replace("গান চালিয়ে দাও", "").replace("play", "").trim();
+                speak("Yes Rohit, ইউটিউবে " + query + " I am lookig for the song।", 'bn-BD');
                 window.open(`https://www.youtube.com/results?search_query=${query}`, "_blank");
             } 
             else if (cmd.includes("নমস্কার") || cmd.includes("হ্যালো") || cmd.includes("hello")) {
