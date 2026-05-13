@@ -3,22 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aegis AI | Mobile Fix</title>
+    <title>Aegis AI | Smart Assistant</title>
     <style>
         :root { --glow: #00f2ff; --dark: #000; }
         body { background: var(--dark); margin: 0; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Orbitron', sans-serif; overflow: hidden; }
         
-        .aegis-core { position: relative; width: 280px; height: 280px; display: flex; justify-content: center; align-items: center; cursor: pointer; }
+        .aegis-core { position: relative; width: 300px; height: 300px; display: flex; justify-content: center; align-items: center; cursor: pointer; }
         .ring { position: absolute; border-radius: 50%; border: 2px solid transparent; }
         .r1 { width: 100%; height: 100%; border-top: 4px solid var(--glow); border-bottom: 4px solid var(--glow); animation: rotate 8s linear infinite; }
         .r2 { width: 80%; height: 80%; border-left: 3px dashed var(--glow); border-right: 3px dashed var(--glow); animation: rotate 5s linear reverse infinite; opacity: 0.6; }
-        .center-glow { width: 80px; height: 80px; background: radial-gradient(circle, #fff, var(--glow), transparent); border-radius: 50%; box-shadow: 0 0 50px var(--glow); z-index: 10; display: flex; align-items: center; justify-content: center; color: #000; font-size: 14px; font-weight: 900; animation: breath 2s ease-in-out infinite; }
+        .center-glow { width: 90px; height: 90px; background: radial-gradient(circle, #fff, var(--glow), transparent); border-radius: 50%; box-shadow: 0 0 50px var(--glow); z-index: 10; display: flex; align-items: center; justify-content: center; color: #000; font-size: 14px; font-weight: 900; animation: breath 2s ease-in-out infinite; }
 
         @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         @keyframes breath { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.1); opacity: 1; } }
 
-        .console { margin-top: 30px; width: 85%; max-width: 400px; border-left: 3px solid var(--glow); padding: 15px; background: rgba(0, 242, 255, 0.05); }
-        #status-txt { font-size: 14px; color: var(--glow); letter-spacing: 2px; }
+        .console { margin-top: 40px; width: 85%; max-width: 450px; border-left: 3px solid var(--glow); padding: 15px; background: rgba(0, 242, 255, 0.05); }
+        #status-txt { font-size: 15px; color: var(--glow); letter-spacing: 2px; }
         #log-txt { font-size: 12px; color: #fff; margin-top: 10px; font-family: monospace; opacity: 0.7; }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&display=swap" rel="stylesheet">
@@ -33,7 +33,7 @@
 
     <div class="console">
         <div id="status-txt">SYSTEM STANDBY</div>
-        <div id="log-txt">> Tap core once to initialize system.</div>
+        <div id="log-txt">> Click core to initialize...</div>
     </div>
 
     <script>
@@ -43,77 +43,71 @@
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         const recognition = new SpeechRecognition();
 
+        // Language set to English for better "Play" command detection
         recognition.lang = 'en-US'; 
-        recognition.continuous = true; 
-        recognition.interimResults = false;
+        recognition.continuous = false;
 
-        let isWaitingForCommand = false;
-
-        function speak(text) {
+        function speak(text, lang = 'en-US') {
             const utter = new SpeechSynthesisUtterance(text);
             const voices = synth.getVoices();
-            utter.voice = voices.find(v => v.lang.includes('en-US') && v.name.includes('Female')) || voices[0];
+            utter.voice = voices.find(v => v.lang.includes(lang) || v.name.includes('Female')) || voices[0];
             utter.pitch = 1.1;
             utter.rate = 1.0;
+            utter.lang = lang;
             synth.speak(utter);
         }
+
+        window.speechSynthesis.onvoiceschanged = () => { synth.getVoices(); };
 
         function activateAegis() {
             try {
                 recognition.start();
-                statusDisplay.innerText = "MONITORING...";
-                logDisplay.innerText = "> System Ready. Say 'Hey Aegis'...";
-                speak("Aegis online.");
-            } catch (e) {
-                console.log("Recognition active.");
-            }
+                statusDisplay.innerText = "LISTENING...";
+                logDisplay.innerText = "> System active. Waiting for command...";
+                speak("Aegis is online. What should I play, Rohit?");
+            } catch (e) { console.log("Mic already active"); }
         }
 
         recognition.onresult = (event) => {
-            const last = event.results.length - 1;
-            const cmd = event.results[last][0].transcript.toLowerCase().trim();
-            logDisplay.innerText = "> Heard: " + cmd;
+            const cmd = event.results[0][0].transcript.toLowerCase();
+            logDisplay.innerText = "> USER: " + cmd;
+            statusDisplay.innerText = "PROCESSING...";
 
-            // 1. WAKE WORD DETECTION
-            if (cmd.includes("hey aegis") || cmd.includes("hello aegis") || cmd.includes("aegis")) {
-                isWaitingForCommand = true;
-                statusDisplay.innerText = "ACTIVE - LISTENING";
-                speak("Yes, what should I play?");
-                return;
+            // YouTube Play Logic
+            if (cmd.includes("play") || cmd.includes("song")) {
+                // Extracts everything after 'play'
+                let songQuery = cmd.split("play").pop().trim();
+                if(!songQuery) songQuery = cmd.split("song").pop().trim();
+
+                speak("Sure Rohit, searching YouTube for " + songQuery);
+                window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(songQuery)}`, "_blank");
+            } 
+            
+            // Google Search Logic
+            else if (cmd.includes("search") || cmd.includes("find")) {
+                let searchQuery = cmd.split("search").pop().trim();
+                speak("Scanning the web for " + searchQuery);
+                window.open(`https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`, "_blank");
             }
 
-            // 2. COMMAND LOGIC
-            if (isWaitingForCommand) {
-                if (cmd.includes("play") || cmd.includes("song")) {
-                    let query = cmd.replace("play", "").replace("song", "").trim();
-                    speak("Searching for " + query);
-                    
-                    const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
-                    
-                    // Direct redirect for Mobile (to avoid popup block)
-                    setTimeout(() => {
-                        window.location.href = url; 
-                    }, 1000);
-                    
-                    isWaitingForCommand = false;
-                } else if (cmd.includes("search")) {
-                    let query = cmd.replace("search", "").trim();
-                    window.location.href = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
-                    isWaitingForCommand = false;
-                }
+            // Simple Greetings
+            else if (cmd.includes("hello") || cmd.includes("hi aegis")) {
+                speak("Hello Rohit! All systems are functional.");
+            }
+            else if (cmd.includes("who are you")) {
+                speak("I am Aegis, your personal intelligence system.");
+            }
+            else {
+                speak("Command received: " + cmd);
             }
         };
 
-        // Mobile-e mic restart korar jonno forced loop
         recognition.onend = () => {
-            recognition.start();
-            statusDisplay.innerText = "MONITORING...";
+            statusDisplay.innerText = "SYSTEM READY";
         };
 
         recognition.onerror = (err) => {
-            if(err.error === 'no-speech') {
-                recognition.stop(); // restart trigger korbe
-            }
+            logDisplay.innerText = "> Error: " + err.error;
         };
     </script>
 </body>
