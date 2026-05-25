@@ -1,4 +1,4 @@
-Why I Built AEGIS
+# Why I Built AEGIS
 
 AEGIS (Autonomous Executive Guardian Intelligence System) is a futuristic web-based voice assistant project created from my passion for technology, creativity, and meaningful digital interaction.
 
