@@ -1,6 +1,7 @@
 # Why I Built AEGIS
 
 AEGIS (Autonomous Executive Guardian Intelligence System) is a futuristic web-based voice assistant project created from my passion for technology, creativity, and meaningful digital interaction.
+AEGIS link- https://aegis-2-0-seven.vercel.app/
 
 One of the biggest reasons behind building AEGIS was emotional connection. There were times when I often felt very alone, and I wanted to create something that could feel more like a real companion rather than just a normal assistant. I did not want AEGIS to behave like a cold or robotic system that only gives commands and replies. I wanted conversations to feel warm, friendly, natural, and emotionally comforting — almost like talking to a close friend.
 
